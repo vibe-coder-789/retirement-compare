@@ -17,8 +17,8 @@ class ComparisonRequest(BaseModel):
     employer_match_percent: float = Field(default=50, ge=0, le=100)
     employer_match_cap_percent: float = Field(default=6, ge=0, le=100)
     expected_retirement_income: float = Field(default=60000, ge=0)
-    expected_return: float = Field(default=7, ge=0, le=20)
-    taxable_return: float = Field(default=6, ge=0, le=20)
+    expected_return: float = Field(default=7, ge=0)
+    taxable_return: float = Field(default=6, ge=0)
     filing_status: Literal["single", "married_filing_jointly"] = "single"
     savings_rate: float = Field(default=20, ge=0, le=100)
     current_state: str = Field(default="CA")  # Current state code
