@@ -186,7 +186,10 @@ function displayResults(result) {
         </div>
     `;
 
-    const megaBackdoor = parseFloat(document.getElementById('megaBackdoor').value) || 0;
+    const megaBackdoorInput = parseFloat(document.getElementById('megaBackdoor').value) || 0;
+    const actualMegaBackdoor = projection_summary.actual_mega_backdoor;
+    const megaBackdoorCapped = megaBackdoorInput > 0 && actualMegaBackdoor < megaBackdoorInput;
+
     document.getElementById('contributionDetails').innerHTML = `
         <div class="detail-row">
             <span class="detail-label">Your Contribution</span>
@@ -196,21 +199,22 @@ function displayResults(result) {
             <span class="detail-label">Employer Match</span>
             <span class="detail-value">${formatCurrency(contribution.employer_match)}/year</span>
         </div>
-        ${megaBackdoor > 0 ? `
+        ${actualMegaBackdoor > 0 ? `
         <div class="detail-row">
             <span class="detail-label">Mega Backdoor</span>
-            <span class="detail-value">${formatCurrency(megaBackdoor)}/year</span>
+            <span class="detail-value">${formatCurrency(actualMegaBackdoor)}/year</span>
         </div>
         ` : ''}
         <div class="detail-row font-semibold">
             <span class="detail-label">Total Annual</span>
-            <span class="detail-value">${formatCurrency(contribution.total_contribution + megaBackdoor)}/year</span>
+            <span class="detail-value">${formatCurrency(contribution.total_contribution + actualMegaBackdoor)}/year</span>
         </div>
         <div class="detail-row">
             <span class="detail-label">2024 Limit</span>
             <span class="detail-value">${formatCurrency(contribution.max_employee_allowed)}</span>
         </div>
         ${contribution.is_over_limit ? '<p class="text-red-600 text-xs mt-2">Note: Contribution was capped at the annual limit</p>' : ''}
+        ${megaBackdoorCapped ? `<p class="text-yellow-600 text-xs mt-2">Note: Mega Backdoor capped at take-home pay (requested ${formatCurrency(megaBackdoorInput)})</p>` : ''}
     `;
 
     const trad = tax_comparison.current_traditional;

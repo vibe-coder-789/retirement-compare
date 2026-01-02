@@ -30,6 +30,7 @@ class SplitProjectionResult:
     total_employer_match: float
     total_growth: float
     split_percent: float  # % Traditional
+    actual_mega_backdoor: float  # Capped at take_home
 
 
 @dataclass
@@ -128,9 +129,13 @@ class ProjectionCalculator:
         total_growth_trad = 0.0
         total_growth_roth = 0.0
 
+        # Cap mega backdoor at take_home
+        trad_mega_backdoor = min(mega_backdoor_contribution, trad_take_home)
+        roth_mega_backdoor = min(mega_backdoor_contribution, roth_take_home)
+
         # Calculate savings: savings_rate applied to spending money (after mega backdoor)
-        trad_spending_money = trad_take_home - mega_backdoor_contribution
-        roth_spending_money = roth_take_home - mega_backdoor_contribution
+        trad_spending_money = trad_take_home - trad_mega_backdoor
+        roth_spending_money = roth_take_home - roth_mega_backdoor
 
         trad_annual_savings = max(0, trad_spending_money * self.savings_rate)
         roth_annual_savings = max(0, roth_spending_money * self.savings_rate)
@@ -148,12 +153,12 @@ class ProjectionCalculator:
                 roth_401k_balance, total_trad_contrib
             )
 
-            # Mega backdoor grows tax-free (same rate as 401k)
+            # Mega backdoor grows tax-free (same rate as 401k), capped at take_home
             trad_mega_backdoor_balance, _ = self._calculate_year_growth(
-                trad_mega_backdoor_balance, mega_backdoor_contribution
+                trad_mega_backdoor_balance, trad_mega_backdoor
             )
             roth_mega_backdoor_balance, _ = self._calculate_year_growth(
-                roth_mega_backdoor_balance, mega_backdoor_contribution
+                roth_mega_backdoor_balance, roth_mega_backdoor
             )
 
             trad_div_tax = self._apply_dividend_tax(trad_taxable_balance)
@@ -266,8 +271,11 @@ class ProjectionCalculator:
         total_employer_match_sum = 0.0
         total_growth = 0.0
 
+        # Cap mega backdoor at take_home
+        actual_mega_backdoor = min(mega_backdoor_contribution, take_home)
+
         # Calculate taxable savings: savings_rate applied to spending money (after mega backdoor)
-        spending_money = take_home - mega_backdoor_contribution
+        spending_money = take_home - actual_mega_backdoor
         annual_taxable_savings = max(0, spending_money * self.savings_rate)
 
         for i in range(years):
@@ -291,9 +299,9 @@ class ProjectionCalculator:
 
             combined_growth = trad_growth + roth_growth
 
-            # Mega backdoor grows tax-free
+            # Mega backdoor grows tax-free (capped at take_home)
             mega_backdoor_balance, _ = self._calculate_year_growth(
-                mega_backdoor_balance, mega_backdoor_contribution
+                mega_backdoor_balance, actual_mega_backdoor
             )
 
             # Taxable account with dividend drag
@@ -357,6 +365,7 @@ class ProjectionCalculator:
             total_employer_match=round(total_employer_match_sum, 2),
             total_growth=round(total_growth, 2),
             split_percent=traditional_split,
+            actual_mega_backdoor=round(actual_mega_backdoor, 2),
         )
 
     def find_optimal_split(

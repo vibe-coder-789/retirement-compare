@@ -71,6 +71,7 @@ class ProjectionSummaryResponse(BaseModel):
     roth_taxable_balance: float
     traditional_mega_backdoor_balance: float
     roth_mega_backdoor_balance: float
+    actual_mega_backdoor: float  # Capped at take_home
     total_contributions: float
     total_employer_match: float
     total_growth_traditional: float

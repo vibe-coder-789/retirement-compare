@@ -228,6 +228,7 @@ async def compare_plans(request: ComparisonRequest):
             roth_taxable_balance=split_projection.taxable_balance,
             traditional_mega_backdoor_balance=split_projection.mega_backdoor_balance,
             roth_mega_backdoor_balance=split_projection.mega_backdoor_balance,
+            actual_mega_backdoor=split_projection.actual_mega_backdoor,
             total_contributions=split_projection.total_contributions,
             total_employer_match=split_projection.total_employer_match,
             total_growth_traditional=trad_100_projection.total_growth,
