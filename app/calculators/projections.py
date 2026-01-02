@@ -128,13 +128,12 @@ class ProjectionCalculator:
         total_growth_trad = 0.0
         total_growth_roth = 0.0
 
-        # Calculate savings available after mega backdoor contribution
-        trad_total_savings = trad_take_home * self.savings_rate
-        roth_total_savings = roth_take_home * self.savings_rate
+        # Calculate savings: savings_rate applied to spending money (after mega backdoor)
+        trad_spending_money = trad_take_home - mega_backdoor_contribution
+        roth_spending_money = roth_take_home - mega_backdoor_contribution
 
-        # Mega backdoor comes from savings first, remainder goes to taxable
-        trad_annual_savings = max(0, trad_total_savings - mega_backdoor_contribution)
-        roth_annual_savings = max(0, roth_total_savings - mega_backdoor_contribution)
+        trad_annual_savings = max(0, trad_spending_money * self.savings_rate)
+        roth_annual_savings = max(0, roth_spending_money * self.savings_rate)
 
         for i in range(years):
             year = i + 1
@@ -267,9 +266,9 @@ class ProjectionCalculator:
         total_employer_match_sum = 0.0
         total_growth = 0.0
 
-        # Calculate taxable savings (after mega backdoor)
-        total_savings = take_home * self.savings_rate
-        annual_taxable_savings = max(0, total_savings - mega_backdoor_contribution)
+        # Calculate taxable savings: savings_rate applied to spending money (after mega backdoor)
+        spending_money = take_home - mega_backdoor_contribution
+        annual_taxable_savings = max(0, spending_money * self.savings_rate)
 
         for i in range(years):
             year = i + 1
