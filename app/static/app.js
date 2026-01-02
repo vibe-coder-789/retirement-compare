@@ -48,7 +48,7 @@ document.getElementById('comparisonForm').addEventListener('submit', async funct
         expected_return: parseFloat(document.getElementById('expectedReturn').value),
         taxable_return: parseFloat(document.getElementById('taxableReturn').value) || 6,
         filing_status: document.getElementById('filingStatus').value,
-        savings_rate: parseFloat(document.getElementById('savingsRate').value) || 20,
+        savings_rate: parseFloat(document.getElementById('savingsRate').value),
         current_state: document.getElementById('currentState').value,
         retirement_state: document.getElementById('retirementState').value
     };
