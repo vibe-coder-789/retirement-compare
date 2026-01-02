@@ -27,13 +27,13 @@ document.getElementById('traditionalSplit').addEventListener('input', function()
     }
 });
 
-document.getElementById('comparisonForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-
+async function calculateComparison() {
     const submitBtn = document.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
     submitBtn.disabled = true;
     submitBtn.textContent = 'Calculating...';
+
+    console.log('Starting calculation...');
 
     const data = {
         current_age: parseInt(document.getElementById('currentAge').value),
@@ -58,6 +58,8 @@ document.getElementById('comparisonForm').addEventListener('submit', async funct
         retirement_state: document.getElementById('retirementState').value
     };
 
+    console.log('Request data:', data);
+
     try {
         const response = await fetch('/api/compare', {
             method: 'POST',
@@ -65,14 +67,18 @@ document.getElementById('comparisonForm').addEventListener('submit', async funct
             body: JSON.stringify(data)
         });
 
+        console.log('Response status:', response.status);
+
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.detail || 'Calculation failed');
         }
 
         const result = await response.json();
+        console.log('Result received:', result.projection_summary.roth_after_tax);
         displayResults(result);
     } catch (error) {
+        console.error('Error:', error);
         document.getElementById('results').innerHTML = `
             <div class="bg-red-100 text-red-700 p-4 rounded-md">
                 Error: ${error.message}
@@ -82,6 +88,12 @@ document.getElementById('comparisonForm').addEventListener('submit', async funct
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
     }
+}
+
+// Form submit handler
+document.getElementById('comparisonForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    calculateComparison();
 });
 
 function formatCurrency(value) {
@@ -174,6 +186,7 @@ function displayResults(result) {
         </div>
     `;
 
+    const megaBackdoor = parseFloat(document.getElementById('megaBackdoor').value) || 0;
     document.getElementById('contributionDetails').innerHTML = `
         <div class="detail-row">
             <span class="detail-label">Your Contribution</span>
@@ -183,9 +196,15 @@ function displayResults(result) {
             <span class="detail-label">Employer Match</span>
             <span class="detail-value">${formatCurrency(contribution.employer_match)}/year</span>
         </div>
+        ${megaBackdoor > 0 ? `
         <div class="detail-row">
+            <span class="detail-label">Mega Backdoor</span>
+            <span class="detail-value">${formatCurrency(megaBackdoor)}/year</span>
+        </div>
+        ` : ''}
+        <div class="detail-row font-semibold">
             <span class="detail-label">Total Annual</span>
-            <span class="detail-value">${formatCurrency(contribution.total_contribution)}/year</span>
+            <span class="detail-value">${formatCurrency(contribution.total_contribution + megaBackdoor)}/year</span>
         </div>
         <div class="detail-row">
             <span class="detail-label">2024 Limit</span>
