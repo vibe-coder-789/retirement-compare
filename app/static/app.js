@@ -30,6 +30,11 @@ document.getElementById('traditionalSplit').addEventListener('input', function()
 document.getElementById('comparisonForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Calculating...';
+
     const data = {
         current_age: parseInt(document.getElementById('currentAge').value),
         retirement_age: parseInt(document.getElementById('retirementAge').value),
@@ -73,6 +78,9 @@ document.getElementById('comparisonForm').addEventListener('submit', async funct
                 Error: ${error.message}
             </div>
         `;
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
     }
 });
 
