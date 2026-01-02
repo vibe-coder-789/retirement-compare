@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>401(k) Comparison Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">
+            Traditional vs Roth 401(k) Comparison
+        </h1>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Input Form -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Your Information</h2>
+                <form id="comparisonForm" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Current Age</label>
+                            <input type="number" id="currentAge" value="35" min="18" max="70"
+                                class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Retirement Age</label>
+                            <input type="number" id="retirementAge" value="65" min="50" max="80"
+                                class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Annual Salary ($)</label>
+                            <input type="number" id="annualIncome" value="100000" min="0"
+                                class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Annual Bonus ($)</label>
+                            <input type="number" id="annualBonus" value="0" min="0"
+                                class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                            <p class="text-xs text-gray-400 mt-1">Affects tax, not matched</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Current 401(k) Balance ($)</label>
+                            <input type="number" id="initial401k" value="0" min="0"
+                                class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Current Taxable Balance ($)</label>
+                            <input type="number" id="initialTaxable" value="0" min="0"
+                                class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Contribution Mode</label>
+                        <select id="contributionMode"
+                            class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                            <option value="percentage">Percentage of Salary</option>
+                            <option value="dollar">Dollar Amount</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">
+                            <span id="contributionLabel">Contribution (%)</span>
+                        </label>
+                        <input type="number" id="contributionAmount" value="10" min="0" step="0.1"
+                            class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Contribution Timing</label>
+                        <select id="contributionTiming"
+                            class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                            <option value="monthly">Monthly</option>
+                            <option value="beginning">Beginning of Year</option>
+                            <option value="end">End of Year</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <label class="block text-sm font-medium text-gray-600 mb-2">
+                            Traditional/Roth Split: <span id="splitLabel" class="font-bold text-blue-600">100% Traditional</span>
+                        </label>
+                        <input type="range" id="traditionalSplit" value="100" min="0" max="100" step="5"
+                            class="w-full h-2 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>100% Roth</span>
+                            <span>100% Traditional</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Mega Backdoor Roth ($)</label>
+                        <input type="number" id="megaBackdoor" value="0" min="0" max="46000"
+                            class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        <p class="text-xs text-gray-400 mt-1">Additional after-tax → Roth (separate from above)</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Employer Match (%)</label>
+                            <input type="number" id="employerMatch" value="50" min="0" max="100"
+                                class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Match Cap (%)</label>
+                            <input type="number" id="matchCap" value="6" min="0" max="100"
+                                class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Expected Retirement Income ($)</label>
+                        <input type="number" id="retirementIncome" value="60000" min="0"
+                            class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">401(k) Return (%)</label>
+                            <input type="number" id="expectedReturn" value="7" min="0" max="20" step="0.1"
+                                class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Taxable Return (%)</label>
+                            <input type="number" id="taxableReturn" value="6" min="0" max="20" step="0.1"
+                                class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Savings Rate (%)</label>
+                        <input type="number" id="savingsRate" value="20" min="0" max="100" step="1"
+                            class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                        <p class="text-xs text-gray-400 mt-1">% of take-home saved</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Filing Status</label>
+                        <select id="filingStatus"
+                            class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                            <option value="single">Single</option>
+                            <option value="married_filing_jointly">Married Filing Jointly</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Current State</label>
+                            <select id="currentState"
+                                class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                                <option value="AL">Alabama (5.0%)</option>
+                                <option value="AK">Alaska (0%)</option>
+                                <option value="AZ">Arizona (2.5%)</option>
+                                <option value="AR">Arkansas (4.7%)</option>
+                                <option value="CA" selected>California (9.3%)</option>
+                                <option value="CO">Colorado (4.4%)</option>
+                                <option value="CT">Connecticut (6.0%)</option>
+                                <option value="DE">Delaware (6.6%)</option>
+                                <option value="FL">Florida (0%)</option>
+                                <option value="GA">Georgia (5.5%)</option>
+                                <option value="HI">Hawaii (8.0%)</option>
+                                <option value="ID">Idaho (5.8%)</option>
+                                <option value="IL">Illinois (5.0%)</option>
+                                <option value="IN">Indiana (3.2%)</option>
+                                <option value="IA">Iowa (5.7%)</option>
+                                <option value="KS">Kansas (5.7%)</option>
+                                <option value="KY">Kentucky (4.5%)</option>
+                                <option value="LA">Louisiana (4.3%)</option>
+                                <option value="ME">Maine (7.2%)</option>
+                                <option value="MD">Maryland (5.8%)</option>
+                                <option value="MA">Massachusetts (5.0%)</option>
+                                <option value="MI">Michigan (4.3%)</option>
+                                <option value="MN">Minnesota (7.9%)</option>
+                                <option value="MS">Mississippi (5.0%)</option>
+                                <option value="MO">Missouri (4.9%)</option>
+                                <option value="MT">Montana (5.9%)</option>
+                                <option value="NE">Nebraska (5.8%)</option>
+                                <option value="NV">Nevada (0%)</option>
+                                <option value="NH">New Hampshire (0%)</option>
+                                <option value="NJ">New Jersey (6.4%)</option>
+                                <option value="NM">New Mexico (4.9%)</option>
+                                <option value="NY">New York (8.5%)</option>
+                                <option value="NC">North Carolina (5.3%)</option>
+                                <option value="ND">North Dakota (2.5%)</option>
+                                <option value="OH">Ohio (4.0%)</option>
+                                <option value="OK">Oklahoma (4.8%)</option>
+                                <option value="OR">Oregon (9.9%)</option>
+                                <option value="PA">Pennsylvania (3.1%)</option>
+                                <option value="RI">Rhode Island (6.0%)</option>
+                                <option value="SC">South Carolina (6.5%)</option>
+                                <option value="SD">South Dakota (0%)</option>
+                                <option value="TN">Tennessee (0%)</option>
+                                <option value="TX">Texas (0%)</option>
+                                <option value="UT">Utah (4.7%)</option>
+                                <option value="VT">Vermont (7.6%)</option>
+                                <option value="VA">Virginia (5.8%)</option>
+                                <option value="WA">Washington (0%)</option>
+                                <option value="WV">West Virginia (5.5%)</option>
+                                <option value="WI">Wisconsin (6.5%)</option>
+                                <option value="WY">Wyoming (0%)</option>
+                                <option value="DC">Washington D.C. (8.5%)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600">Retirement State</label>
+                            <select id="retirementState"
+                                class="mt-1 w-full rounded-md border-gray-300 shadow-sm p-2 border">
+                                <option value="AL">Alabama (5.0%)</option>
+                                <option value="AK">Alaska (0%)</option>
+                                <option value="AZ">Arizona (2.5%)</option>
+                                <option value="AR">Arkansas (4.7%)</option>
+                                <option value="CA" selected>California (9.3%)</option>
+                                <option value="CO">Colorado (4.4%)</option>
+                                <option value="CT">Connecticut (6.0%)</option>
+                                <option value="DE">Delaware (6.6%)</option>
+                                <option value="FL">Florida (0%)</option>
+                                <option value="GA">Georgia (5.5%)</option>
+                                <option value="HI">Hawaii (8.0%)</option>
+                                <option value="ID">Idaho (5.8%)</option>
+                                <option value="IL">Illinois (5.0%)</option>
+                                <option value="IN">Indiana (3.2%)</option>
+                                <option value="IA">Iowa (5.7%)</option>
+                                <option value="KS">Kansas (5.7%)</option>
+                                <option value="KY">Kentucky (4.5%)</option>
+                                <option value="LA">Louisiana (4.3%)</option>
+                                <option value="ME">Maine (7.2%)</option>
+                                <option value="MD">Maryland (5.8%)</option>
+                                <option value="MA">Massachusetts (5.0%)</option>
+                                <option value="MI">Michigan (4.3%)</option>
+                                <option value="MN">Minnesota (7.9%)</option>
+                                <option value="MS">Mississippi (5.0%)</option>
+                                <option value="MO">Missouri (4.9%)</option>
+                                <option value="MT">Montana (5.9%)</option>
+                                <option value="NE">Nebraska (5.8%)</option>
+                                <option value="NV">Nevada (0%)</option>
+                                <option value="NH">New Hampshire (0%)</option>
+                                <option value="NJ">New Jersey (6.4%)</option>
+                                <option value="NM">New Mexico (4.9%)</option>
+                                <option value="NY">New York (8.5%)</option>
+                                <option value="NC">North Carolina (5.3%)</option>
+                                <option value="ND">North Dakota (2.5%)</option>
+                                <option value="OH">Ohio (4.0%)</option>
+                                <option value="OK">Oklahoma (4.8%)</option>
+                                <option value="OR">Oregon (9.9%)</option>
+                                <option value="PA">Pennsylvania (3.1%)</option>
+                                <option value="RI">Rhode Island (6.0%)</option>
+                                <option value="SC">South Carolina (6.5%)</option>
+                                <option value="SD">South Dakota (0%)</option>
+                                <option value="TN">Tennessee (0%)</option>
+                                <option value="TX">Texas (0%)</option>
+                                <option value="UT">Utah (4.7%)</option>
+                                <option value="VT">Vermont (7.6%)</option>
+                                <option value="VA">Virginia (5.8%)</option>
+                                <option value="WA">Washington (0%)</option>
+                                <option value="WV">West Virginia (5.5%)</option>
+                                <option value="WI">Wisconsin (6.5%)</option>
+                                <option value="WY">Wyoming (0%)</option>
+                                <option value="DC">Washington D.C. (8.5%)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 -mt-2">No income tax: AK, FL, NV, NH, SD, TN, TX, WA, WY</p>
+
+                    <button type="submit"
+                        class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition">
+                        Calculate Comparison
+                    </button>
+                </form>
+            </div>
+
+            <!-- Results Summary -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Results Summary</h2>
+                <div id="results" class="space-y-4">
+                    <p class="text-gray-500 text-center py-8">Enter your information and click Calculate</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6" id="chartsSection" style="display: none;">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">After-Tax Wealth Projection</h2>
+            <div class="h-96">
+                <canvas id="growthChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Detailed Breakdown -->
+        <div class="mt-8 grid md:grid-cols-3 gap-6" id="detailsSection" style="display: none;">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold mb-3 text-gray-700">Contributions</h3>
+                <div id="contributionDetails" class="space-y-2 text-sm"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold mb-3 text-gray-700">Tax Impact</h3>
+                <div id="taxDetails" class="space-y-2 text-sm"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold mb-3 text-gray-700">Final Values</h3>
+                <div id="projectionDetails" class="space-y-2 text-sm"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
