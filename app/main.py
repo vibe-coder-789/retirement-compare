@@ -96,7 +96,11 @@ async def compare_plans(request: ComparisonRequest):
     current_year_savings = current_roth_tax.total_tax - current_traditional_tax.total_tax
 
     # Calculate retirement taxes (using retirement state rate)
-    retirement_tax = retirement_tax_calc.calculate_tax(request.expected_retirement_income)
+    # No FICA on retirement income (401k withdrawals are not wages)
+    retirement_tax = retirement_tax_calc.calculate_tax(
+        request.expected_retirement_income,
+        include_fica=False
+    )
 
     # Calculate take-home for the actual split
     current_split = request.traditional_split

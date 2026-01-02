@@ -148,18 +148,19 @@ class TaxCalculator:
         self.brackets = TAX_BRACKETS_2024[filing_status]
         self.state_tax_rate = state_tax_rate
 
-    def calculate_tax(self, taxable_income: float, gross_wages: float = None) -> TaxResult:
+    def calculate_tax(self, taxable_income: float, gross_wages: float = None, include_fica: bool = True) -> TaxResult:
         """Calculate taxes on income.
 
         Args:
             taxable_income: Income after 401(k) deductions (for federal/state tax)
             gross_wages: Original gross wages for FICA calculation (if None, uses taxable_income)
+            include_fica: Whether to include FICA taxes (False for retirement income)
         """
         if gross_wages is None:
             gross_wages = taxable_income
 
         if taxable_income <= 0:
-            fica_tax = calculate_fica_tax(gross_wages, self.filing_status) if gross_wages > 0 else 0
+            fica_tax = calculate_fica_tax(gross_wages, self.filing_status) if (gross_wages > 0 and include_fica) else 0
             return TaxResult(
                 taxable_income=0, federal_tax=0, state_tax=0, fica_tax=fica_tax,
                 total_tax=fica_tax, effective_rate=0, marginal_rate=0.10
@@ -183,11 +184,12 @@ class TaxCalculator:
         state_tax = taxable_income * self.state_tax_rate
 
         # FICA tax (on gross wages, not reduced by 401k)
-        fica_tax = calculate_fica_tax(gross_wages, self.filing_status)
+        # Only include for wage income, not retirement income
+        fica_tax = calculate_fica_tax(gross_wages, self.filing_status) if include_fica else 0
 
         total_tax = federal_tax + state_tax + fica_tax
 
-        effective_rate = total_tax / gross_wages if gross_wages > 0 else 0
+        effective_rate = total_tax / taxable_income if taxable_income > 0 else 0
 
         return TaxResult(
             taxable_income=round(taxable_income, 2),
